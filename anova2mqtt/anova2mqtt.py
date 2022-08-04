@@ -5,6 +5,8 @@ from datetime import datetime
 import paho.mqtt.client as mqtt
 
 from anova2mqtt.anova import AnovaCooker
+from anova2mqtt.anova.AnovaCooker import InvalidDeviceID
+
 
 def main(config):
     mqtt_client = mqtt.Client(client_id="anova2mqtt_"+datetime.now().strftime("%Y%m%d-%H%M%S"))
@@ -22,7 +24,7 @@ def main(config):
             try:
                 cooker = AnovaCooker(config['cooker']['deviceid'])
                 cooker.authenticate(config['cooker']['email'], config['cooker']['password'])
-            except Exception as e:
+            except InvalidDeviceID:
                 cooker = None
                 print("Device not found")
 
@@ -54,7 +56,11 @@ def loop(config, cooker_state, cooker, mqtt_client):
     return cooker_state
 
 def cooker_update(cooker: AnovaCooker):
-    cooker.update_state()
+    try:
+        cooker.update_state()
+    except InvalidDeviceID:
+        print("Cooker not found")
+        return None
 
     cooker_state = {
         'job_status': cooker.job_status,
@@ -75,5 +81,5 @@ def cooker_update(cooker: AnovaCooker):
     return cooker_state
 
 
-def shutdown(signum, frame):  # signum and frame are mandatory
+def shutdown(signum, frame):  # noqa, signum and frame are mandatory
     sys.exit(0)
