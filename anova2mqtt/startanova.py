@@ -1,7 +1,7 @@
 import configparser
 import os
 
-from anova import AnovaCooker
+from anova2mqtt.anova import AnovaCooker
 
 config = configparser.ConfigParser()
 config.read(os.path.expanduser('~/.anova2mqtt/config.ini'))

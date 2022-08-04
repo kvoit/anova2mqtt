@@ -42,11 +42,14 @@ def loop(config, cooker_state, cooker, mqtt_client):
 
     cooker_state = cooker_update(cooker)
 
-    if cooker_state_old is None or not cooker_state['heater_temp'] == cooker_state_old['heater_temp']:
-        res = mqtt_client.publish(config['mqtt']['basetopic'] + config['cooker']['deviceid'] + "/heater_temp", payload=str(cooker_state['heater_temp']), retain=True)
-        print(f"Publishing new temp {cooker_state['heater_temp']}°C: {res}")
-    elif cooker_state_old is not None:
-        print(f"Temp did not change ({cooker_state['heater_temp']})")
+    publish_fields = ["heater_temp", "water_temp"]
+    if cooker_state is not None:
+        for pf in publish_fields:
+            if cooker_state_old is None or not cooker_state[pf] == cooker_state_old[pf]:
+                res = mqtt_client.publish(config['mqtt']['basetopic'] + config['cooker']['deviceid'] + "/" + pf, payload=str(cooker_state[pf]), retain=True)
+                print(f"Publishing new {pf} {cooker_state[pf]}°C: {res}")
+    else:
+        print("No cooker available")
 
     return cooker_state
 
