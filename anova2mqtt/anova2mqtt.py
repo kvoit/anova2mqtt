@@ -4,7 +4,7 @@ from datetime import datetime
 
 import paho.mqtt.client as mqtt
 
-from anova import AnovaCooker
+from anova2mqtt.anova import AnovaCooker
 
 def main(config):
     mqtt_client = mqtt.Client(client_id="anova2mqtt_"+datetime.now().strftime("%Y%m%d-%H%M%S"))
