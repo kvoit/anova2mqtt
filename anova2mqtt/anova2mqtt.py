@@ -3,6 +3,7 @@ import time
 from datetime import datetime
 
 import paho.mqtt.client as mqtt
+import requests
 
 from anova2mqtt.anova import AnovaCooker
 from anova2mqtt.anova.AnovaCooker import InvalidDeviceID
@@ -65,6 +66,9 @@ def cooker_update(cooker: AnovaCooker):
         cooker.update_state()
     except InvalidDeviceID:
         print("Cooker not found")
+        return None
+    except requests.exceptions.ConnectionError:
+        print("Connection error to cooker")
         return None
 
     cooker_state = {
