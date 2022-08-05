@@ -15,25 +15,30 @@ def main(config):
 
     cooker = None
     cooker_state = None
+    end_time = time.time()
 
     while True:
-        end_time = time.time() + int(config['general']['interval'])
+        mqtt_client.loop()
+        if time.time() > end_time:
+            while time.time() > end_time:
+                end_time = end_time + int(config['general']['interval'])
 
-        if cooker is None:
-            print("Creating cooker")
-            try:
-                cooker = AnovaCooker(config['cooker']['deviceid'])
-                cooker.authenticate(config['cooker']['email'], config['cooker']['password'])
-            except InvalidDeviceID:
-                cooker = None
-                print("Device not found")
+            if cooker is None:
+                print("Creating cooker")
+                try:
+                    cooker = AnovaCooker(config['cooker']['deviceid'])
+                    cooker.authenticate(config['cooker']['email'], config['cooker']['password'])
+                except InvalidDeviceID:
+                    cooker = None
+                    print("Device not found")
 
-        if cooker is not None:
-            cooker_state = loop(config, cooker_state, cooker, mqtt_client)
+            if cooker is not None:
+                cooker_state = loop(config, cooker_state, cooker, mqtt_client)
 
-        sleep_time = end_time - time.time()
-        print(f"Sleeping {sleep_time}s")
-        time.sleep(sleep_time)
+            sleep_time = end_time - time.time()
+            print(f"Next update in {sleep_time}s")
+
+        time.sleep(1)
 
 
 def loop(config, cooker_state, cooker, mqtt_client):
